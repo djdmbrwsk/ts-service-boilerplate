@@ -1,0 +1,53 @@
+{
+  "name": "ts-service-boilerplate",
+  "version": "0.0.1",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/djdmbrwsk/ts-service-boilerplate.git"
+  },
+  "license": "MIT",
+  "devDependencies": {
+    "@types/jest": "^24.0.21",
+    "@types/node": "^12.12.5",
+    "@typescript-eslint/eslint-plugin": "^2.6.1",
+    "@typescript-eslint/parser": "^2.6.1",
+    "concurrently": "^5.0.0",
+    "eslint": "^6.6.0",
+    "eslint-config-prettier": "^6.5.0",
+    "eslint-plugin-prettier": "^3.1.1",
+    "husky": "^3.0.9",
+    "jest": "^24.9.0",
+    "lint-staged": "^9.4.2",
+    "nodemon": "^1.19.4",
+    "prettier": "1.18.2",
+    "rimraf": "^3.0.0",
+    "ts-jest": "^24.1.0",
+    "typescript": "^3.7.0-beta"
+  },
+  "scripts": {
+    "build": "tsc",
+    "clean": "rimraf ./build",
+    "format": "prettier --write \"**/*.{md,js,json,ts,yaml,yml}\"",
+    "lint": "eslint \"{src,test}/**/*.ts\"",
+    "start": "npm run clean && npm run build && concurrently -n Node -c \"cyan.bold\" \"node --inspect=0.0.0.0:9229 ./build/index.js\"",
+    "test": "jest --verbose --coverage",
+    "watch": "npm run clean && npm run build -- --incremental && concurrently -k -n TypeScript,Node -c \"yellow.bold,cyan.bold\" \"npm run watch-ts\" \"npm run watch-node\"",
+    "watch-node": "nodemon --inspect=0.0.0.0:9229 --watch ./build ./build/index.js",
+    "watch-ts": "tsc -w --incremental --preserveWatchOutput"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
+  },
+  "lint-staged": {
+    "**/*.{md,js,json,ts,yaml,yml}": [
+      "prettier --write",
+      "git add"
+    ],
+    "{src,test}/**/*.ts": [
+      "eslint --fix",
+      "git add"
+    ]
+  }
+}
