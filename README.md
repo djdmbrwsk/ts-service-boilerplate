@@ -4,6 +4,8 @@ This project is meant to be a base for a Node.js service (or API) written in
 TypeScript. It ships with Express (coming soon), but it can easily be swapped
 out for another API library, a task runner, etc.
 
+For a similar, but simpler boilerplate checkout [ts-boilerplate](https://github.com/djdmbrwsk/ts-boilerplate)
+
 ## Features
 
 ### Ships with:
