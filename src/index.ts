@@ -1,5 +1,6 @@
-import Process from './utils/Process';
+import App from './App';
 
-export default Process.start().catch(err => {
-  Process.exitWithError('Error during startup()', err);
+const app = new App();
+export default app.start().catch(err => {
+  app.exitWithError('Error during start()', err);
 });

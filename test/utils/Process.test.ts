@@ -1,10 +1,8 @@
 import * as inspector from 'inspector';
 
-import App from '../../src/App';
-import { Process } from '../../src/utils/Process';
+import Process from '../../src/lib/Process';
 
 jest.mock('inspector');
-jest.mock('../../src/App');
 
 /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
 type FunctionMap = { [key: string]: (...args: any[]) => any };
@@ -23,24 +21,15 @@ function mockProcessOn(): {
   return { processOnCallbacks, processOnSpy };
 }
 
+class MyProcess extends Process {}
+
 beforeEach(() => {
   jest.restoreAllMocks();
 });
 
 describe('start()', () => {
-  test('should only run start() once when called multiple times', async () => {
-    const p = new Process();
-    mockProcessOn();
-    const appStartupSpy = jest.spyOn(App, 'startup');
-
-    await expect(p.start()).resolves;
-    await expect(p.start()).resolves;
-
-    expect(appStartupSpy).toBeCalledTimes(1);
-  });
-
   test('should setup shutdown signal listeners that will exitGracefully()', async () => {
-    const p = new Process();
+    const p = new MyProcess();
     const { processOnCallbacks, processOnSpy } = mockProcessOn();
     const pExitGracefullySpy = jest
       .spyOn(p, 'exitGracefully')
@@ -51,11 +40,11 @@ describe('start()', () => {
 
     const sigIntCb = processOnCallbacks['SIGINT'];
     await sigIntCb();
-    expect(pExitGracefullySpy).toBeCalledWith('SIGINT', 2);
+    expect(pExitGracefullySpy).toBeCalledWith('SIGINT', 130);
   });
 
   test('should setup shutdown signal listeners that will exitWithError() when unhandled error during exitGracefully()', async () => {
-    const p = new Process();
+    const p = new MyProcess();
     const { processOnCallbacks, processOnSpy } = mockProcessOn();
     jest.spyOn(p, 'exitGracefully').mockRejectedValue(new Error('Some error'));
     const pExitWithErrorSpy = jest
@@ -73,8 +62,8 @@ describe('start()', () => {
     );
   });
 
-  test('should setup uncaugnt exception listener that will exitWithError()', async () => {
-    const p = new Process();
+  test('should setup "uncaughtException" listener that will exitWithError()', async () => {
+    const p = new MyProcess();
     const { processOnCallbacks, processOnSpy } = mockProcessOn();
     const pExitWithErrorSpy = jest
       .spyOn(p, 'exitWithError')
@@ -94,8 +83,8 @@ describe('start()', () => {
     );
   });
 
-  test('should setup unhandled rejection listener that will exitWithError()', async () => {
-    const p = new Process();
+  test('should setup "unhandledRejection" listener that will exitWithError()', async () => {
+    const p = new MyProcess();
     const { processOnCallbacks, processOnSpy } = mockProcessOn();
     const pExitWithErrorSpy = jest
       .spyOn(p, 'exitWithError')
@@ -117,19 +106,8 @@ describe('start()', () => {
 });
 
 describe('exitGracefully()', () => {
-  test('should only run exitGracefully() once when called multiple times', async () => {
-    const p = new Process();
-    jest.spyOn(process, 'exit').mockImplementation();
-    const appShutdownSpy = jest.spyOn(App, 'shutdown');
-
-    await expect(p.exitGracefully('SIGINT', 2)).resolves;
-    await expect(p.exitGracefully('SIGINT', 2)).resolves;
-
-    expect(appShutdownSpy).toBeCalledWith('SIGINT', 130);
-  });
-
   test('should close() inspector when open', async () => {
-    const p = new Process();
+    const p = new MyProcess();
     const inspectorUrlSpy = jest
       .spyOn(inspector, 'url')
       .mockReturnValue('truthy-value');
@@ -141,17 +119,24 @@ describe('exitGracefully()', () => {
     expect(inspectorUrlSpy).toBeCalled();
     expect(inspectorCloseSpy).toBeCalled();
   });
+
+  test('should exit process with correct code', async () => {
+    const p = new MyProcess();
+    const processExitSpy = jest.spyOn(process, 'exit').mockImplementation();
+
+    await expect(p.exitGracefully('SIGINT', 130)).resolves;
+
+    expect(processExitSpy).toBeCalledWith(130);
+  });
 });
 
 describe('exitWithError()', () => {
   test('should log and exit', async () => {
-    const p = new Process();
-    const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
+    const p = new MyProcess();
     const processExitSpy = jest.spyOn(process, 'exit').mockImplementation();
 
     p.exitWithError('Some message', new Error('Some error'));
 
-    expect(consoleErrorSpy).toBeCalledWith('Some message', expect.any(Error));
     expect(processExitSpy).toBeCalledWith(1);
   });
 });

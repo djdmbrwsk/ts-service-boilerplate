@@ -1,15 +1,7 @@
 import * as inspector from 'inspector';
 
-import App from '../App';
-
-export class Process {
-  private isStarting = false;
-  private isExiting = false;
-
+export default abstract class Process {
   public async start(): Promise<void> {
-    if (this.isStarting) return;
-    this.isStarting = true;
-
     const signals = new Map<NodeJS.Signals, number>([
       ['SIGHUP', 1],
       ['SIGINT', 2],
@@ -20,7 +12,8 @@ export class Process {
     signals.forEach((value, signal) => {
       process.on(signal, async () => {
         try {
-          await this.exitGracefully(signal, value);
+          const code = 128 + value;
+          await this.exitGracefully(signal, code);
         } catch (err) {
           this.exitWithError('Error during exitGracefully()', err);
         }
@@ -34,31 +27,20 @@ export class Process {
     process.on('unhandledRejection', reason => {
       this.exitWithError('Unhandled rejection', reason);
     });
-
-    await App.startup();
   }
 
   public async exitGracefully(
     signal: NodeJS.Signals,
-    value: number,
+    code: number,
   ): Promise<void> {
-    if (this.isExiting) return;
-    this.isExiting = true;
-
-    const code = 128 + value;
-    await App.shutdown(signal, code);
-
     if (inspector.url()) {
       inspector.close();
     }
     process.exit(code);
   }
 
-  /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
+  /* eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars */
   public exitWithError(message: string, error?: any): void {
-    console.error(message, error);
     process.exit(1);
   }
 }
-
-export default new Process();

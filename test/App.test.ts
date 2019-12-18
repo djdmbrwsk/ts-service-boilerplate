@@ -1,10 +1,42 @@
 import App from '../src/App';
+import Process from '../src/lib/Process';
 
-afterEach(() => {
+jest.mock('../src/lib/Process');
+
+const originalPort = process.env.PORT;
+
+beforeEach(() => {
   jest.restoreAllMocks();
+  process.env.PORT = originalPort;
 });
 
-test('should startup() and shutdown()', async () => {
-  await expect(App.startup()).resolves;
-  await expect(App.shutdown('SIGINT', 130)).resolves;
+test('should start() and exitGracefully()', async () => {
+  delete process.env.PORT;
+  const app = new App();
+  await expect(app.start()).resolves;
+  await expect(app.exitGracefully('SIGINT', 2)).resolves;
+});
+
+test('should call super.exitGracefully()', async () => {
+  const processExitGracefullySpy = jest.spyOn(
+    Process.prototype,
+    'exitGracefully',
+  );
+
+  const app = new App();
+  await expect(app.start()).resolves;
+  await expect(app.exitGracefully('SIGINT', 2)).resolves;
+  expect(processExitGracefullySpy).toBeCalled();
+});
+
+test('should call super.exitWithError()', async () => {
+  const processExitWithErrorSpy = jest.spyOn(
+    Process.prototype,
+    'exitWithError',
+  );
+
+  const app = new App();
+  await expect(app.start()).resolves;
+  app.exitWithError('Some error');
+  expect(processExitWithErrorSpy).toBeCalled();
 });
