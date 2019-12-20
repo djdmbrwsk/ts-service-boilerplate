@@ -114,7 +114,7 @@ describe('exitGracefully()', () => {
     const inspectorCloseSpy = jest.spyOn(inspector, 'close');
     jest.spyOn(process, 'exit').mockImplementation();
 
-    await expect(p.exitGracefully('SIGINT', 2)).resolves;
+    await expect(p.exitGracefully('SIGINT', 130)).resolves;
 
     expect(inspectorUrlSpy).toBeCalled();
     expect(inspectorCloseSpy).toBeCalled();

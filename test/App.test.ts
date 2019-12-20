@@ -14,7 +14,15 @@ test('should start() and exitGracefully()', async () => {
   delete process.env.PORT;
   const app = new App();
   await expect(app.start()).resolves;
-  await expect(app.exitGracefully('SIGINT', 2)).resolves;
+  await expect(app.exitGracefully('SIGINT', 130)).resolves;
+});
+
+test('should call super.start()', async () => {
+  const processStartSpy = jest.spyOn(Process.prototype, 'start');
+
+  const app = new App();
+  await expect(app.start()).resolves;
+  expect(processStartSpy).toBeCalled();
 });
 
 test('should call super.exitGracefully()', async () => {
@@ -25,7 +33,7 @@ test('should call super.exitGracefully()', async () => {
 
   const app = new App();
   await expect(app.start()).resolves;
-  await expect(app.exitGracefully('SIGINT', 2)).resolves;
+  await expect(app.exitGracefully('SIGINT', 130)).resolves;
   expect(processExitGracefullySpy).toBeCalled();
 });
 
