@@ -8,9 +8,12 @@
   "license": "MIT",
   "dependencies": {
     "dotenv-cra": "0.0.6",
+    "express": "^4.17.1",
+    "express-async-errors": "^3.1.1",
     "find-up": "^4.1.0"
   },
   "devDependencies": {
+    "@types/express": "^4.17.2",
     "@types/jest": "^24.0.23",
     "@types/node": "^12.12.17",
     "@typescript-eslint/eslint-plugin": "^2.11.0",

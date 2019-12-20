@@ -1,16 +1,21 @@
-import Process from './lib/Process';
 import { config as dotenvCraConfig } from 'dotenv-cra';
+import express, { Express, NextFunction, Request, Response } from 'express';
+import http, { Server } from 'http';
 
+import { RootController } from './controllers';
 import loadPackageEnv from './lib/loadPackageEnv';
+import { notFound, internalServerError } from './lib/handlers';
+import Process from './lib/Process';
 
 let LOG = true;
 
 export default class App extends Process {
-  private running = false;
+  public app?: Express;
+  public server?: Server;
 
   public async start(): Promise<void> {
-    // TODO: Remove
-    // await this.timeout(3000);
+    // TODO: Remove after done debugging
+    // await new Promise(resolve => setTimeout(resolve, 3000));
 
     // Call Process.start() first to setup process.on() handlers
     await super.start();
@@ -22,11 +27,12 @@ export default class App extends Process {
     // Start your app
     const { NODE_ENV, PACKAGE_NAME, PACKAGE_VERSION } = process.env;
     LOG = process.env.LOGGING_ENABLED === 'true';
+
+    this.configureExpress();
     LOG &&
       console.debug(
         `Starting ${PACKAGE_NAME} v${PACKAGE_VERSION} in "${NODE_ENV}" mode...`,
       );
-    this.run();
   }
 
   public async exitGracefully(
@@ -38,7 +44,7 @@ export default class App extends Process {
       console.debug(
         `Graceful exit triggered by ${signal} with code ${code}...`,
       );
-    this.running = false;
+    this.server?.close();
 
     // Call Process.exitGracefully() last to facilitate process.exit()
     await super.exitGracefully(signal, code);
@@ -53,15 +59,33 @@ export default class App extends Process {
     super.exitWithError(message, error);
   }
 
-  private async run(): Promise<void> {
-    this.running = true;
-    while (this.running && process.env.NODE_ENV !== 'test') {
-      LOG && console.debug('App running...');
-      await this.timeout(1000);
-    }
-  }
+  private configureExpress(): void {
+    require('express-async-errors');
 
-  private async timeout(ms: number): Promise<void> {
-    return new Promise(resolve => setTimeout(resolve, ms));
+    this.app = express();
+    this.server = http.createServer(this.app);
+
+    this.app.use('/', new RootController().router);
+
+    // TODO: Remove once integration tests
+    this.app.get('/break', async () => {
+      throw new Error('Some error');
+    });
+
+    this.app.use(notFound);
+    this.app.use((
+      /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
+      err: any,
+      req: Request,
+      res: Response,
+      next: NextFunction,
+    ): void => {
+      LOG && console.error('500 Internal Server Error: ', err);
+      next(err);
+    }, internalServerError);
+
+    const port = Number(process.env.PORT) || 3000;
+    this.app.set('port', port);
+    this.server.listen(port);
   }
 }

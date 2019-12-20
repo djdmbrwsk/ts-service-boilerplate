@@ -1,3 +1,5 @@
+import { Server } from 'http';
+
 import App from '../src/App';
 import Process from '../src/lib/Process';
 
@@ -8,6 +10,7 @@ const originalPort = process.env.PORT;
 beforeEach(() => {
   jest.restoreAllMocks();
   process.env.PORT = originalPort;
+  jest.spyOn(Server.prototype, 'listen').mockImplementation();
 });
 
 test('should start() and exitGracefully()', async () => {
