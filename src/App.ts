@@ -1,13 +1,14 @@
 import { config as dotenvCraConfig } from 'dotenv-cra';
 import express, { Express, NextFunction, Request, Response } from 'express';
 import http, { Server } from 'http';
+import morgan from 'morgan';
+import winston from 'winston';
 
 import { RootController } from './controllers';
 import loadPackageEnv from './lib/loadPackageEnv';
 import { notFound, internalServerError } from './lib/handlers';
 import Process from './lib/Process';
-
-let LOG = true;
+import buildLoggingDefaultMeta from './utils/buildLoggingDefaultMeta';
 
 export default class App extends Process {
   public app?: Express;
@@ -25,14 +26,12 @@ export default class App extends Process {
     loadPackageEnv();
 
     // Start your app
-    const { NODE_ENV, PACKAGE_NAME, PACKAGE_VERSION } = process.env;
-    LOG = process.env.LOGGING_ENABLED === 'true';
-
+    this.configureWinston();
     this.configureExpress();
-    LOG &&
-      console.debug(
-        `Starting ${PACKAGE_NAME} v${PACKAGE_VERSION} in "${NODE_ENV}" mode...`,
-      );
+    const { NODE_ENV, PACKAGE_NAME, PACKAGE_VERSION } = process.env;
+    winston.info(
+      `Starting ${PACKAGE_NAME} v${PACKAGE_VERSION} in "${NODE_ENV}" mode...`,
+    );
   }
 
   public async exitGracefully(
@@ -40,10 +39,7 @@ export default class App extends Process {
     code: number,
   ): Promise<void> {
     // Stop your app
-    LOG &&
-      console.debug(
-        `Graceful exit triggered by ${signal} with code ${code}...`,
-      );
+    winston.info(`Graceful exit triggered by ${signal} with code ${code}...`);
     this.server?.close();
 
     // Call Process.exitGracefully() last to facilitate process.exit()
@@ -53,10 +49,26 @@ export default class App extends Process {
   /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
   public exitWithError(message: string, error?: any): void {
     // Log the error
-    LOG && console.error(message, error);
+    winston.error(`${message}: `, error);
 
     // Call Process.exitWithError() last to facilitate process.exit()
     super.exitWithError(message, error);
+  }
+
+  private configureWinston(): void {
+    winston.configure({
+      silent: process.env.LOGGING_ENABLED !== 'true',
+      level: process.env.LOG_LEVEL,
+      defaultMeta: buildLoggingDefaultMeta(),
+      format: winston.format.combine(
+        winston.format.errors({ stack: true }),
+        winston.format.splat(),
+        winston.format.colorize(),
+        winston.format.timestamp(),
+        winston.format.simple(),
+      ),
+      transports: [new winston.transports.Console()],
+    });
   }
 
   private configureExpress(): void {
@@ -64,6 +76,8 @@ export default class App extends Process {
 
     this.app = express();
     this.server = http.createServer(this.app);
+
+    this.app.use(morgan('combined', { stream: { write: winston.debug } }));
 
     this.app.use('/', new RootController().router);
 
@@ -80,7 +94,7 @@ export default class App extends Process {
       res: Response,
       next: NextFunction,
     ): void => {
-      LOG && console.error('500 Internal Server Error: ', err);
+      winston.error('500 Internal Server Error: ', err);
       next(err);
     }, internalServerError);
 

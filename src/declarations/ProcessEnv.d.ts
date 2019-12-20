@@ -15,6 +15,7 @@ declare namespace NodeJS {
 
     // App config
     LOGGING_ENABLED: string;
+    LOG_LEVEL: string;
     PORT: string;
   }
 }
