@@ -6,6 +6,10 @@
     "url": "https://github.com/djdmbrwsk/ts-service-boilerplate.git"
   },
   "license": "MIT",
+  "dependencies": {
+    "dotenv-cra": "0.0.6",
+    "find-up": "^4.1.0"
+  },
   "devDependencies": {
     "@types/jest": "^24.0.23",
     "@types/node": "^12.12.17",

@@ -1,14 +1,31 @@
 import Process from './lib/Process';
+import { config as dotenvCraConfig } from 'dotenv-cra';
+
+import loadPackageEnv from './lib/loadPackageEnv';
+
+let LOG = true;
 
 export default class App extends Process {
   private running = false;
 
   public async start(): Promise<void> {
+    // TODO: Remove
+    // await this.timeout(3000);
+
     // Call Process.start() first to setup process.on() handlers
     await super.start();
 
+    // Load the appropriate config into process.env before anything else
+    dotenvCraConfig();
+    loadPackageEnv();
+
     // Start your app
-    console.debug('App starting up...');
+    const { NODE_ENV, PACKAGE_NAME, PACKAGE_VERSION } = process.env;
+    LOG = process.env.LOGGING_ENABLED === 'true';
+    LOG &&
+      console.debug(
+        `Starting ${PACKAGE_NAME} v${PACKAGE_VERSION} in "${NODE_ENV}" mode...`,
+      );
     this.run();
   }
 
@@ -17,7 +34,10 @@ export default class App extends Process {
     code: number,
   ): Promise<void> {
     // Stop your app
-    console.debug(`App shutdown triggered by ${signal} with code ${code}...`);
+    LOG &&
+      console.debug(
+        `Graceful exit triggered by ${signal} with code ${code}...`,
+      );
     this.running = false;
 
     // Call Process.exitGracefully() last to facilitate process.exit()
@@ -27,7 +47,7 @@ export default class App extends Process {
   /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
   public exitWithError(message: string, error?: any): void {
     // Log the error
-    console.error(message, error);
+    LOG && console.error(message, error);
 
     // Call Process.exitWithError() last to facilitate process.exit()
     super.exitWithError(message, error);
@@ -36,7 +56,7 @@ export default class App extends Process {
   private async run(): Promise<void> {
     this.running = true;
     while (this.running && process.env.NODE_ENV !== 'test') {
-      console.debug('App running...');
+      LOG && console.debug('App running...');
       await this.timeout(1000);
     }
   }
