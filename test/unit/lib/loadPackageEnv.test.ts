@@ -32,7 +32,9 @@ test('should error when `name` not found in package.json', async () => {
 });
 
 test('should error when `version` not found in package.json', async () => {
-  jest.spyOn(fs, 'readFileSync').mockReturnValue('{ "name": "some-package" }');
+  jest
+    .spyOn(fs, 'readFileSync')
+    .mockReturnValue(JSON.stringify({ name: 'some-package' }));
   expect(() => loadPackageEnv()).toThrowError(
     'No `version` key found in package.json',
   );
