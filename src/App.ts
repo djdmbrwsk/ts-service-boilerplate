@@ -1,10 +1,11 @@
 import { config as dotenvCraConfig } from 'dotenv-cra';
-import express, { Express, NextFunction, Request, Response } from 'express';
+import express, { Express } from 'express';
 import http, { Server } from 'http';
 import morgan from 'morgan';
 import winston from 'winston';
 
 import { RootController } from './controllers';
+import { logInternalServerError } from './middleware';
 import loadPackageEnv from './lib/loadPackageEnv';
 import { notFound, internalServerError } from './lib/middleware';
 import Process from './lib/Process';
@@ -81,22 +82,8 @@ export default class App extends Process {
 
     this.app.use('/', new RootController().router);
 
-    // TODO: Remove once integration tests
-    this.app.get('/break', async () => {
-      throw new Error('Some error');
-    });
-
-    this.app.use(notFound);
-    this.app.use((
-      /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
-      err: any,
-      req: Request,
-      res: Response,
-      next: NextFunction,
-    ): void => {
-      winston.error('500 Internal Server Error: ', err);
-      next(err);
-    }, internalServerError);
+    this.express.use(notFound);
+    this.express.use(logInternalServerError, internalServerError);
 
     const port = Number(process.env.PORT) || 3000;
     this.app.set('port', port);
