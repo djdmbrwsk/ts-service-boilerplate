@@ -121,6 +121,8 @@ describe('exitGracefully()', () => {
   });
 
   test('should exit process with correct code', async () => {
+    jest.spyOn(inspector, 'url').mockReturnValue(undefined);
+
     const p = new MyProcess();
     const processExitSpy = jest.spyOn(process, 'exit').mockImplementation();
 
