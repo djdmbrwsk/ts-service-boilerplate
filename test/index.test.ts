@@ -7,6 +7,14 @@ beforeEach(() => {
   process.env.NODE_ENV = originalNodeEnv;
 });
 
+test('should default NODE_ENV when not provided', async () => {
+  delete process.env.NODE_ENV;
+  jest.spyOn(App.prototype, 'start').mockResolvedValue();
+
+  await loadIsolatedIndex();
+  expect(process.env.NODE_ENV).toEqual('development');
+});
+
 test('should start the App', async () => {
   const processStartSpy = jest
     .spyOn(App.prototype, 'start')
