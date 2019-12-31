@@ -5,16 +5,12 @@ import Process from '../src/lib/Process';
 
 jest.mock('../src/lib/Process');
 
-const originalPort = process.env.PORT;
-
 beforeEach(() => {
   jest.restoreAllMocks();
-  process.env.PORT = originalPort;
   jest.spyOn(Server.prototype, 'listen').mockImplementation();
 });
 
 test('should start() and exitGracefully()', async () => {
-  delete process.env.PORT;
   const app = new App();
   await expect(app.start()).resolves;
   await expect(app.exitGracefully('SIGINT', 130)).resolves;
@@ -50,4 +46,12 @@ test('should call super.exitWithError()', async () => {
   await expect(app.start()).resolves;
   app.exitWithError('Some error');
   expect(processExitWithErrorSpy).toBeCalled();
+});
+
+test('should exitGracefully() when configuration incomplete', async () => {
+  jest.spyOn(App.prototype, 'start').mockResolvedValue();
+
+  const app = new App();
+  await expect(app.start()).resolves;
+  await expect(app.exitGracefully('SIGINT', 130)).resolves;
 });

@@ -12,13 +12,10 @@ import Process from './lib/Process';
 import buildLoggingDefaultMeta from './utils/buildLoggingDefaultMeta';
 
 export default class App extends Process {
-  public app?: Express;
+  public express?: Express;
   public server?: Server;
 
   public async start(): Promise<void> {
-    // TODO: Remove after done debugging
-    // await new Promise(resolve => setTimeout(resolve, 3000));
-
     // Call Process.start() first to setup process.on() handlers
     await super.start();
 
@@ -75,18 +72,18 @@ export default class App extends Process {
   private configureExpress(): void {
     require('express-async-errors');
 
-    this.app = express();
-    this.server = http.createServer(this.app);
+    this.express = express();
+    this.server = http.createServer(this.express);
 
-    this.app.use(morgan('combined', { stream: { write: winston.debug } }));
+    this.express.use(morgan('combined', { stream: { write: winston.debug } }));
 
-    this.app.use('/', new RootController().router);
+    this.express.use('/', new RootController().router);
 
     this.express.use(notFound);
     this.express.use(logInternalServerError, internalServerError);
 
-    const port = Number(process.env.PORT) || 3000;
-    this.app.set('port', port);
+    const port = Number(process.env.PORT);
+    this.express.set('port', port);
     this.server.listen(port);
   }
 }
