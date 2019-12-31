@@ -1,4 +1,4 @@
-import notFound from '../../../src/lib/middleware/notFound';
+import notFound from '../../../../src/lib/middleware/notFound';
 
 beforeEach(() => {
   jest.restoreAllMocks();

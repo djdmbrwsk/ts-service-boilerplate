@@ -1,4 +1,4 @@
-import internalServerError from '../../../src/lib/middleware/internalServerError';
+import internalServerError from '../../../../src/lib/middleware/internalServerError';
 
 const originalNodeEnv = process.env.NODE_ENV;
 

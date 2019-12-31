@@ -1,4 +1,4 @@
-import App from '../src/App';
+import App from '../../src/App';
 
 const originalNodeEnv = process.env.NODE_ENV;
 
@@ -41,11 +41,11 @@ test('should catch and exit when error occurs starting the App', async () => {
 
 // Load isolated index.ts so it doesn't end up in the "require cache". Necessary
 // because it executes when required/imported and we want to test it many times.
-function loadIsolatedIndex(): Promise<typeof import('../src/index')> {
+function loadIsolatedIndex(): Promise<typeof import('../../src/index')> {
   return new Promise(resolve => {
     jest.isolateModules(() => {
       /* eslint-disable-next-line @typescript-eslint/no-var-requires */
-      const index = require('../src/index');
+      const index = require('../../src/index');
       resolve(index);
     });
   });

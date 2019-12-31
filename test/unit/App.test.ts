@@ -1,9 +1,9 @@
 import { Server } from 'http';
 
-import App from '../src/App';
-import Process from '../src/lib/Process';
+import App from '../../src/App';
+import Process from '../../src/lib/Process';
 
-jest.mock('../src/lib/Process');
+jest.mock('../../src/lib/Process');
 
 beforeEach(() => {
   jest.restoreAllMocks();

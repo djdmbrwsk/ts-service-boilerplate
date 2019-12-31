@@ -1,6 +1,6 @@
 import * as inspector from 'inspector';
 
-import Process from '../../src/lib/Process';
+import Process from '../../../src/lib/Process';
 
 jest.mock('inspector');
 

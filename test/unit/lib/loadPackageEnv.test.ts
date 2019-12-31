@@ -1,7 +1,7 @@
 import fs from 'fs';
 import findUp from 'find-up';
 
-import loadPackageEnv from '../../src/lib/loadPackageEnv';
+import loadPackageEnv from '../../../src/lib/loadPackageEnv';
 
 beforeEach(() => {
   jest.restoreAllMocks();
