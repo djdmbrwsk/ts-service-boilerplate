@@ -6,7 +6,7 @@ import winston from 'winston';
 
 import { RootController } from './controllers';
 import loadPackageEnv from './lib/loadPackageEnv';
-import { notFound, internalServerError } from './lib/handlers';
+import { notFound, internalServerError } from './lib/middleware';
 import Process from './lib/Process';
 import buildLoggingDefaultMeta from './utils/buildLoggingDefaultMeta';
 
