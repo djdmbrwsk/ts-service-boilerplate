@@ -2,7 +2,7 @@ import internalServerError from '../../../../src/lib/middleware/internalServerEr
 
 const originalNodeEnv = process.env.NODE_ENV;
 
-beforeEach(() => {
+afterEach(() => {
   jest.restoreAllMocks();
   process.env.NODE_ENV = originalNodeEnv;
 });

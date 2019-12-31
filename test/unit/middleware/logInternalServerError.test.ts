@@ -2,7 +2,7 @@ import winston from 'winston';
 
 import logInternalServerError from '../../../src/middleware/logInternalServerError';
 
-beforeEach(() => {
+afterEach(() => {
   jest.restoreAllMocks();
 });
 

@@ -9,13 +9,14 @@ jest.mock('../../../src/lib/Process');
 let express: Express | undefined;
 
 beforeAll(async () => {
-  jest.spyOn(Server.prototype, 'listen').mockImplementation();
+  const listenSpy = jest.spyOn(Server.prototype, 'listen').mockImplementation();
   const app = new App();
   await app.start();
   express = app.express;
+  listenSpy.mockRestore();
 });
 
-beforeEach(() => {
+afterEach(() => {
   jest.restoreAllMocks();
 });
 

@@ -6,8 +6,11 @@ import Process from '../../src/lib/Process';
 jest.mock('../../src/lib/Process');
 
 beforeEach(() => {
-  jest.restoreAllMocks();
   jest.spyOn(Server.prototype, 'listen').mockImplementation();
+});
+
+afterEach(() => {
+  jest.restoreAllMocks();
 });
 
 test('should start() and exitGracefully()', async () => {

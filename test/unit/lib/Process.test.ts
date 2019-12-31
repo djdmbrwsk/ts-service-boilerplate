@@ -23,7 +23,7 @@ function mockProcessOn(): {
 
 class MyProcess extends Process {}
 
-beforeEach(() => {
+afterEach(() => {
   jest.restoreAllMocks();
 });
 

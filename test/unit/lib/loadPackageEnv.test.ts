@@ -3,7 +3,7 @@ import findUp from 'find-up';
 
 import loadPackageEnv from '../../../src/lib/loadPackageEnv';
 
-beforeEach(() => {
+afterEach(() => {
   jest.restoreAllMocks();
 });
 
