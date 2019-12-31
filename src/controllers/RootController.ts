@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 
 import Controller from '../lib/Controller';
 
-export default class HealthController extends Controller {
+export default class RootController extends Controller {
   public async root(req: Request, res: Response): Promise<void> {
     res.status(200).send({
       /* eslint-disable @typescript-eslint/camelcase */
