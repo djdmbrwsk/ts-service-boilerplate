@@ -7,7 +7,7 @@
   },
   "license": "MIT",
   "dependencies": {
-    "dotenv-cra": "0.0.6",
+    "dotenv-cra": "1.0.0",
     "express": "^4.17.1",
     "express-async-errors": "^3.1.1",
     "find-up": "^4.1.0",
